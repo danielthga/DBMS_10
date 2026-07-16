@@ -21,7 +21,7 @@
 \textbf{Repository:} \url{https://github.com/MaxClerkwell/DBMS_10} \\
 \textbf{Prerequisites:} Lectures 01--10, exercises DBMS\_01--DBMS\_09 \\
 \textbf{Type of exercise:} design and written submission -- \emph{not} a coding assignment \\
-\textbf{Size (proposal):} 2--4 pages \\
+\textbf{Size (proposal):} about 6 pages \\
 \textbf{Effort (term project):} max.\ 2 months window, approx.\ 40\,h of real work incl.\ documentation and video
 \end{infobox}
 
@@ -44,7 +44,7 @@ application do you want to implement? Which data does it manage? Which functions
 does it offer?
 
 \begin{infobox}
-\textbf{Goal of this exercise:} Submit a 2--4-page project proposal that states
+\textbf{Goal of this exercise:} Submit an approx.\ 6-page project proposal that states
 \emph{which} database-backed system you want to build for the term project and
 \emph{how} it draws on the contents of lectures 01--10.
 \end{infobox}
@@ -245,7 +245,7 @@ extension.
 \section{The project proposal -- your submission}
 % ============================================================
 
-Submit a PDF of \textbf{2--4 pages} containing the following sections. Use the
+Submit a PDF of \textbf{about 6 pages} containing the following sections. Use the
 headings as a template -- a ready-to-fill skeleton is provided in
 \texttt{proposal-template/}.
 
@@ -288,14 +288,17 @@ Mark behind which endpoint a \textbf{query with a JOIN} and where an
 \textbf{aggregation} sits (L 06), and which endpoints require the
 \texttt{X-API-Key}.
 
-\subsection{Frontend idea}
+\subsection{Frontend prototype (hand sketches)}
 
-Briefly describe what the frontend looks like and which endpoints it operates
-(L 10). A rough wireframe or a list of the screens/forms is enough. State
-whether you use the recommended Python variant (tkinter) or something else --
-and in the latter case, what and why. Note that the frontend is delivered as a
-\textbf{\texttt{.deb} installer} and collects the API URL and key in a
-\textbf{connection dialog} at startup.
+Describe what the frontend looks like and which endpoints it operates (L 10), and
+document a \textbf{prototypical frontend with hand-drawn sketches}. Provide
+\textbf{one sketch per screen/form} (including the startup connection dialog) that
+shows the layout, the inputs and which endpoint the screen calls -- a clean hand
+drawing, photographed, is entirely sufficient. State whether you use the
+recommended Python variant (tkinter) or something else -- and in the latter case,
+what and why. Note that the frontend is delivered as a \textbf{\texttt{.deb}
+installer} and collects the API URL and key in a \textbf{connection dialog} at
+startup.
 
 \subsection{Operation with Docker Compose}
 
@@ -306,18 +309,33 @@ server}.
 
 \subsection{Scope, milestones and risks}
 
-Estimate the scope honestly: how many tables and endpoints? Name \textbf{2--3
-milestones} (e.g.\ ``schema + seed data ready'', ``API reading/writing'',
-``frontend operates the core endpoints'', ``documentation + video'') and
+Estimate the scope honestly: how many tables and endpoints? Give \textbf{2--3
+milestones} as a small \textbf{schedule} that maps each milestone to a week and
+an estimated number of hours (e.g.\ ``schema + seed data ready'', ``API
+reading/writing'', ``frontend operates the core endpoints'', ``tests +
+documentation + video''); the hours should add up to roughly 40. Name
 \textbf{one or two risks} that could make it fail. Keep the total within the
 \textbf{$\approx$40\,h / 2-month} budget.
+
+\subsection{Acceptance criteria and testing}
+
+State \emph{when} your system counts as ``done and correct'' and \emph{how} you
+prove it. Give a handful of \textbf{acceptance criteria} as checkable statements
+about the finished system (e.g.\ ``a record that violates a constraint is
+rejected with a 4xx'', ``a write endpoint without a valid \texttt{X-API-Key} is
+refused'', ``\texttt{GET /\dots} returns the correct aggregated value'') and a
+short \textbf{test plan} that names what you test and with which tools --
+database constraints (PK/FK/UNIQUE/NOT NULL), API endpoints (happy path and
+error cases, e.g.\ with \texttt{pytest} and FastAPI's \texttt{TestClient}, L 08)
+and the business rule behind the risk you named above. Turn that risk into at
+least one concrete test case.
 
 % ============================================================
 \section{Formal requirements for the submission}
 % ============================================================
 
 \begin{itemize}[leftmargin=1.4em]
-  \item \textbf{Format:} one PDF, 2--4 pages, with the sections from
+  \item \textbf{Format:} one PDF, about 6 pages, with the sections from
         Section~5 (start from \texttt{proposal-template/}).
   \item \textbf{Submission:} by email to
         \href{mailto:sboekelmann@ep1.rub.de}{sboekelmann@ep1.rub.de}. Also place
@@ -349,12 +367,15 @@ a self-check before submitting.
         (3 to 6 tables, at least 3NF).
   \item At least one reading and one writing API endpoint are planned; JOIN and
         aggregation are located; write endpoints require the \texttt{X-API-Key}.
-  \item The frontend and the endpoints it uses are sketched; it is delivered as
-        a \texttt{.deb} with a connection dialog.
+  \item A prototypical frontend is documented with a hand sketch per screen/form
+        (including the connection dialog), each naming the endpoint it calls; it
+        is delivered as a \texttt{.deb}.
   \item The Docker Compose backend (postgres + api, \texttt{.env}) and its
         deployment on the lecture server are named.
-  \item Scope, milestones and risks are realistic and fit the
-        $\approx$40\,h / 2-month budget.
+  \item Scope, milestones (with a week/hours schedule) and risks are realistic
+        and fit the $\approx$40\,h / 2-month budget.
+  \item Acceptance criteria and a short test plan are given; the named risk is
+        turned into at least one concrete test case.
   \item The mandatory stack (PostgreSQL, FastAPI, Docker Compose, frontend) is
         fully covered.
 \end{itemize}
@@ -403,10 +424,18 @@ asks for API URL and key at startup.
 data via an init script; deployed on the lecture server.
 
 \medskip
-\textbf{Milestones.} (1)~schema + seed data; (2)~API reading/writing;
-(3)~frontend operates both tabs, packaged as \texttt{.deb};
-(4)~documentation + video. \textbf{Risk:} correct return handling when several
-open loans of the same book exist at once.
+\textbf{Milestones.} (1)~week 1: schema + seed data ($\approx$8\,h);
+(2)~weeks 2--3: API reading/writing ($\approx$12\,h); (3)~weeks 4--5: frontend
+operates both tabs, packaged as \texttt{.deb} ($\approx$10\,h); (4)~week 6:
+tests + documentation + video ($\approx$10\,h). \textbf{Risk:} correct return
+handling when several open loans of the same book exist at once.
+
+\medskip
+\textbf{Acceptance criteria \& tests.} A book with \texttt{stock\,=\,0} cannot be
+lent (\texttt{POST /loans} returns 409); \texttt{GET /books} shows the correct
+open-loan count per book; \texttt{POST} without a valid \texttt{X-API-Key} is
+refused (401). Verified with \texttt{pytest} + FastAPI \texttt{TestClient}; the
+return-handling risk gets its own test with two open loans of the same book.
 \end{beispielbox}
 
 % ============================================================

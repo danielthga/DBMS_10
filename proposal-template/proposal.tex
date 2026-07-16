@@ -11,6 +11,19 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage{thga-db}
+\usepackage{caption}   % enables \captionof inside minipages
+
+% ----- Placeholder figure (delete once you insert a real image) ----
+% Draws a labelled box you can swap for \includegraphics later.
+% Usage: \placeholder{width}{height}{label text}
+\usetikzlibrary{positioning}
+\newcommand{\placeholder}[3]{%
+  \begin{tikzpicture}
+    \node[draw=THGABlau!45, fill=THGABlau!5, very thick, rounded corners=2pt,
+          minimum width=#1, minimum height=#2, align=center, inner sep=6pt,
+          text=THGABlau!75, font=\small\itshape] {#3};
+  \end{tikzpicture}%
+}
 
 % ----- Fill in your metadata -------------------------------
 \renewcommand{\thgaKurs}{Databases}
@@ -26,7 +39,15 @@
 \textbf{Author:} \authorName \\
 \textbf{Module:} Introduction to Database Management Systems · THGA Bochum \\
 \textbf{Submitted to:} Stephan Bökelmann · \href{mailto:sboekelmann@ep1.rub.de}{sboekelmann@ep1.rub.de} \\
-\textbf{Target size:} 2--4 pages
+\textbf{Target size:} about 6 pages
+\end{infobox}
+
+\begin{infobox}
+\textbf{Every figure must be explained in the running text.} A figure never
+stands on its own: refer to it by number and say what it shows -- e.g.
+``Figure~\ref{fig:er} shows the ER model of \dots''. The placeholder boxes below
+mark where your own images go; replace each with \texttt{\textbackslash
+includegraphics} and keep the caption.
 \end{infobox}
 
 % ============================================================
@@ -40,14 +61,18 @@ it, and for what? Add one or two concrete usage scenarios. >>>
 \section{Data model -- ER sketch}
 % ============================================================
 
-<<< Insert your ER sketch (a photographed hand drawing is fine). It must show
-entity types, key attributes, relationships and cardinalities, including at
-least one N:M relationship. >>>
+\begin{figure}[ht]
+  \centering
+  % Replace the placeholder with: \includegraphics[width=0.85\linewidth]{er-sketch.jpg}
+  \placeholder{0.85\linewidth}{4.5cm}{[ placeholder ]\\ your ER sketch goes here\\ (a photographed hand drawing is fine)}
+  \caption{ER sketch of the <<< domain >>> data model: entity types, key
+  attributes, relationships and cardinalities (at least one N:M).}
+  \label{fig:er}
+\end{figure}
 
-% Example for including an image:
-% \begin{center}
-%   \includegraphics[width=0.9\linewidth]{er-sketch.jpg}
-% \end{center}
+Figure~\ref{fig:er} shows <<< explain your ER model here: name the central
+entity types, the key attributes and the relationships, and point out the N:M
+relationship and its cardinalities. >>>
 
 % ============================================================
 \section{From model to schema}
@@ -82,13 +107,51 @@ sits, and which endpoints require the X-API-Key. >>>
 \end{tabularx}
 
 % ============================================================
-\section{Frontend idea}
+\section{Frontend prototype (hand sketches)}
 % ============================================================
 
-<<< What does the frontend look like and which endpoints does it operate?
-Python/tkinter is recommended; if you use something else, say what and why.
-The frontend is delivered as a .deb installer and asks for the API URL and
-X-API-Key in a connection dialog at startup. >>>
+<<< Describe what the frontend looks like and which endpoints it operates, and
+document a prototypical frontend with hand-drawn sketches -- one per screen/form.
+Python/tkinter is recommended; if you use something else, say what and why. The
+frontend is delivered as a .deb installer and asks for the API URL and X-API-Key
+in a connection dialog at startup. >>>
+
+% The four boxes below are placeholders. Replace each \placeholder{...} with
+% \includegraphics[width=\linewidth]{your-sketch.jpg} and keep the \captionof.
+\begin{figure}[ht]
+\centering
+\begin{minipage}[t]{0.47\linewidth}\centering
+  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ connection dialog}
+  \captionof{figure}{Startup connection dialog: API URL + X-API-Key.}
+  \label{fig:fe-connect}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}\centering
+  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ main / list screen}
+  \captionof{figure}{Main screen: <<< list/table, calls \texttt{GET /<<<…>>>} >>>.}
+  \label{fig:fe-main}
+\end{minipage}
+
+\vspace{1em}
+
+\begin{minipage}[t]{0.47\linewidth}\centering
+  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ detail / form screen}
+  \captionof{figure}{Detail form: <<< create/edit, calls \texttt{POST /<<<…>>>} >>>.}
+  \label{fig:fe-detail}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}\centering
+  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ second feature screen}
+  \captionof{figure}{<<< Second feature screen and the endpoint it calls >>>.}
+  \label{fig:fe-second}
+\end{minipage}
+\end{figure}
+
+Figures~\ref{fig:fe-connect}--\ref{fig:fe-second} show the four screens of the
+prototype. Figure~\ref{fig:fe-connect} shows <<< the connection dialog that
+collects the API URL and X-API-Key at startup >>>; Figure~\ref{fig:fe-main}
+shows <<< the main screen and the endpoint it reads from >>>;
+Figure~\ref{fig:fe-detail} shows <<< the form used to create/edit a record and
+the write endpoint it calls >>>; and Figure~\ref{fig:fe-second} shows <<< the
+remaining screen >>>.
 
 % ============================================================
 \section{Operation with Docker Compose}
@@ -104,15 +167,45 @@ lecture server? >>>
 
 \textbf{Scope.} <<< How many tables and endpoints? >>>
 
-\textbf{Milestones.}
-\begin{enumerate}[topsep=2pt]
-  \item <<< e.g. schema + seed data ready >>>
-  \item <<< e.g. API reading/writing >>>
-  \item <<< e.g. frontend operates the core endpoints, packaged as .deb >>>
-  \item <<< documentation + video >>>
-\end{enumerate}
+\textbf{Milestones and schedule.} <<< Fill in the week and the estimated hours;
+the hours should add up to roughly 40. >>>
+
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}p{1.4cm}Xp{1.8cm}@{}}
+\toprule
+\textbf{Week} & \textbf{Milestone} & \textbf{Est. hours} \\
+\midrule
+<<<1>>>   & <<< e.g. schema + seed data ready >>>                        & <<<8>>> \\
+<<<2--3>>> & <<< e.g. API reading/writing, protected by X-API-Key >>>   & <<<12>>> \\
+<<<4--5>>> & <<< e.g. frontend operates the core endpoints, .deb >>>    & <<<10>>> \\
+<<<6>>>   & <<< e.g. tests + documentation + video >>>                  & <<<10>>> \\
+\bottomrule
+\end{tabularx}
 
 \textbf{Risks.} <<< One or two risks that could make the project fail. >>>
+
+% ============================================================
+\section{Acceptance criteria and testing}
+% ============================================================
+
+<<< State when your system counts as ``done and correct'', and how you prove it.
+Formulate each criterion as a checkable statement, then name the test that backs
+it. Turn the risk above into at least one concrete test case. >>>
+
+\textbf{Acceptance criteria.} <<< Checkable statements about the finished system. >>>
+\begin{itemize}[topsep=2pt]
+  \item <<< e.g. A record that violates a constraint is rejected (API returns 4xx). >>>
+  \item <<< e.g. GET /<<<…>>> returns the correct aggregated value (JOIN + aggregation). >>>
+  \item <<< e.g. Write endpoints without a valid X-API-Key are refused (401/403). >>>
+\end{itemize}
+
+\textbf{Test plan.} <<< What you test and with which tools. A short list is enough. >>>
+\begin{itemize}[topsep=2pt]
+  \item \textbf{Database:} <<< which constraints (PK/FK/UNIQUE/NOT NULL) you verify. >>>
+  \item \textbf{API:} <<< endpoint tests, happy path + error cases, e.g. with
+        \texttt{pytest} and FastAPI's \texttt{TestClient} against a test database (L 08). >>>
+  \item \textbf{Business rule:} <<< the test that covers the risk named above. >>>
+\end{itemize}
 
 \vspace{1em}
 \begin{infobox}

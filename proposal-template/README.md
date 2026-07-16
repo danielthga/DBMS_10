@@ -9,6 +9,6 @@ A fill-in LaTeX skeleton for the **project proposal** you submit to the lecturer
 4. Send the resulting PDF to <sboekelmann@ep1.rub.de> and wait for approval
    before you start implementing.
 
-Target size: **2–4 pages**. See `../src/dbms_10.tex` (the assignment) for what
+Target size: **about 6 pages**. See `../src/dbms_10.tex` (the assignment) for what
 each section must contain, and `../example-documentation/` for the level of
 detail expected in the *final* documentation.
