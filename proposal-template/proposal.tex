@@ -12,6 +12,8 @@
 
 \usepackage{thga-db}
 \usepackage{caption}   % enables \captionof inside minipages
+\usepackage{float}
+\usepackage{placeins}
 
 % ----- Placeholder figure (delete once you insert a real image) ----
 % Draws a labelled box you can swap for \includegraphics later.
@@ -29,7 +31,7 @@
 \renewcommand{\thgaKurs}{Databases}
 \renewcommand{\thgaDatum}{Summer Term 2026}
 \newcommand{\authorName}{Daniel Brendebach}
-\newcommand{\projectTitle}{Filament-Verwaltung}
+\newcommand{\projectTitle}{Filament Management Software}
 
 \begin{document}
 \thispagestyle{empty}
@@ -42,56 +44,93 @@
 \textbf{Target size:} about 6 pages
 \end{infobox}
 
-\begin{infobox}
-\textbf{Every figure must be explained in the running text.} A figure never
-stands on its own: refer to it by number and say what it shows -- e.g.
-``Figure~\ref{fig:er} shows the ER model of \dots''. The placeholder boxes below
-mark where your own images go; replace each with \texttt{\textbackslash
-includegraphics} and keep the caption.
-\end{infobox}
 
 % ============================================================
 \section{Application domain and motivation}
 % ============================================================
 
-<<< Which application do you build and which problem does it solve? Who uses
-it, and for what? Add one or two concrete usage scenarios. >>>
+I would like to develop an application that helps me manage the filament inventory for my 3D printer.
+Over time, I have collected many filament spools from different manufacturers, in various materials and colors.
+As the number of spools has grown, it has become increasingly difficult to keep track of which filament is available, how much material is left on each spool, and which spool should be used for a particular print.
 
-I'd like to build an app that lets me manage the filament for my 3D printer. I have a lot of different spools of filament and am slowly losing track of how much of each color, material, and manufacturer I have. I'll be the main user of this software. 
-The app should allow me to add all my existing filament spools and their current weights, as well as suggest a suitable spool for new prints—so that the lightest spool with enough filament on it is selected.
+The primary user of this application will be myself, but the software should also be designed in a way that allows other hobbyists or makers with similar requirements to use it.
 
+The goal is to replace manual notes or spreadsheets with a structured database that stores all relevant information about the filament inventory.
+The application should allow the user to register different filament types, including the manufacturer, material, color, and other product information.
+For every physical spool, the current remaining weight should be stored, enabling an accurate overview of the available stock.
+
+In addition, the application should maintain a collection of 3D print models, including the estimated amount of filament required and the material needed for each model.
+One of the application's key features will be an intelligent spool selection process.
+Whenever a model is selected for printing, the application should automatically determine the most suitable spool by choosing the spool with the smallest remaining amount of filament that is still sufficient to complete the print.
+This minimizes filament waste and helps consume partially used spools before opening new ones.
+To keep the inventory accurate over time, every completed print will be recorded in a print history.
+
+The application will automatically reduce the remaining weight of the selected spool by the amount of filament used and store information about the printed model, the spool used, the print date, and the actual filament consumption.
+This creates a complete history of all print jobs and makes it possible to analyze filament usage over time.
+
+Overall, the project demonstrates the design and implementation of a relational database application that combines inventory management with automated decision-making while maintaining data consistency and referential integrity.
 % ============================================================
 \section{Data model -- ER sketch}
 % ============================================================
 
 \begin{figure}[ht]
   \centering
-  % Replace the placeholder with: \includegraphics[width=0.85\linewidth]{er-sketch.jpg}
-  \placeholder{0.85\linewidth}{4.5cm}{[ placeholder ]\\ your ER sketch goes here\\ (a photographed hand drawing is fine)}
-  \caption{ER sketch of the <<< domain >>> data model: entity types, key
-  attributes, relationships and cardinalities (at least one N:M).}
+  \includegraphics[width=0.85\linewidth]{er-sketch.png}
+  \caption{ER sketch of the filament management application data model: entity types, key
+    attributes, relationships and cardinalities.}
   \label{fig:er}
 \end{figure}
 
-Figure~\ref{fig:er} shows <<< explain your ER model here: name the central
-entity types, the key attributes and the relationships, and point out the N:M
-relationship and its cardinalities. >>>
+Figure~\ref{fig:er} shows the Entity-Relationship model of the filament management application.
+The central entity types are FilamentType, FilamentRoll, PrintModel, and PrintJob.
+FilamentType represents the general description of a filament product, including its manufacturer, material, and color.
+Each filament type can have multiple physical spools (FilamentRoll), while each spool belongs to exactly one filament type. 
+The entity FilamentRoll stores inventory-related information such as the remaining weight and purchase date.
+The entity PrintModel represents a printable object and stores general information such as the model name, estimated filament consumption, and estimated printing time. A PrintJob represents an actual printing process of a specific model and stores information such as the printing date and whether the print was successful.
+The relationship between PrintJob and FilamentRoll is a many-to-many (N:M) relationship. A single print job can consume multiple filament rolls, for example when a print uses multiple colors or when one spool is not sufficient to complete the print. At the same time, one filament roll can be used in multiple print jobs until the material is depleted.
 
 % ============================================================
 \section{From model to schema}
 % ============================================================
 
-<<< Derive the relational schema. For each table give the columns, the primary
-key (underlined) and the foreign keys. >>>
-
 \begin{itemize}
-  \item \texttt{<<<table>>>}(\underline{id}, <<<column>>>, \dots)
-  \item \texttt{<<<table>>>}(\underline{id}, \emph{<<<foreign\_key>>>}, \dots)
+  \item \texttt{manufacturer}(\underline{manufacturer\_id}, name)
+  
+  \item \texttt{material}(\underline{material\_id}, name)
+  
+  \item \texttt{filament\_type}(\underline{filament\_type\_id}, 
+  \emph{manufacturer\_id}, \emph{material\_id}, product\_name, color, diameter)
+  
+  \item \texttt{filament\_roll}(\underline{roll\_id}, 
+  \emph{filament\_type\_id}, remaining\_weight, purchase\_date, location)
+  
+  \item \texttt{print\_model}(\underline{model\_id}, 
+  name, estimated\_filament, estimated\_time, notes)
+  
+  \item \texttt{print\_job}(\underline{job\_id}, 
+  \emph{model\_id}, print\_date, successful, notes)
+  
+  \item \texttt{print\_job\_roll}(\underline{job\_id}, 
+  \underline{\emph{roll\_id}}, filament\_used)
 \end{itemize}
 
-\textbf{Normalisation.} <<< One or two sentences: why is the schema free of
-redundancy (at least 3NF)? >>>
+\textbf{Normalisation}
 
+The schema is normalized to at least Third Normal Form (3NF), because each
+relation represents a single entity or relationship and every non-key attribute
+depends only on the primary key of its relation. Redundant information such as
+manufacturer, material, and filament properties is stored only once and
+referenced using foreign keys.
+
+\textbf{N to M}
+
+The many-to-many relationship between \texttt{print\_job} and
+\texttt{filament\_roll} is resolved by the associative relation
+\texttt{print\_job\_roll}, which stores the relationship-specific attribute
+\texttt{filament\_used}. This avoids data duplication and maintains referential
+integrity.
+
+\clearpage
 % ============================================================
 \section{API design}
 % ============================================================
@@ -104,111 +143,234 @@ sits, and which endpoints require the X-API-Key. >>>
 \toprule
 \textbf{Method} & \textbf{Path} & \textbf{Purpose} \\
 \midrule
-\texttt{GET}  & \texttt{/<<<…>>>} & <<< reads … (JOIN / aggregation) >>> \\
-\texttt{POST} & \texttt{/<<<…>>>} & <<< creates … (requires X-API-Key) >>> \\
+
+\texttt{GET} &
+\texttt{/filament/types} &
+Reads all filament types including manufacturer and material information
+(JOIN between \texttt{filament\_type}, \texttt{manufacturer} and
+\texttt{material}). \\
+
+\texttt{GET} &
+\texttt{/filament/rolls} &
+Reads all filament rolls including their filament type information
+(JOIN between \texttt{filament\_roll} and \texttt{filament\_type}). \\
+
+\texttt{GET} &
+\texttt{/filament/stock} &
+Reads the current filament inventory grouped by filament type and calculates
+the available amount using aggregation (\texttt{SUM()} and \texttt{GROUP BY}). \\
+
+\texttt{POST} &
+\texttt{/filament/rolls} &
+Creates a new filament roll entry with manufacturer, material and weight
+information (requires \texttt{X-API-Key}). \\
+
+\texttt{GET} &
+\texttt{/models} &
+Reads all available 3D print models stored in the database. \\
+
+\texttt{POST} &
+\texttt{/models} &
+Creates a new 3D print model entry
+(requires \texttt{X-API-Key}). \\
+
+\texttt{GET} &
+\texttt{/print/jobs} &
+Reads the print history including model information and consumed filament
+rolls (JOIN between \texttt{print\_job}, \texttt{print\_model},
+\texttt{print\_job\_roll} and \texttt{filament\_roll}). \\
+
+\texttt{POST} &
+\texttt{/print/jobs} &
+Creates a new print job, selects suitable filament rolls, updates the remaining
+filament weight and stores the consumption history
+(requires \texttt{X-API-Key}). \\
+
+
 \bottomrule
 \end{tabularx}
+
+\clearpage
 
 % ============================================================
 \section{Frontend prototype (hand sketches)}
 % ============================================================
 
-<<< Describe what the frontend looks like and which endpoints it operates, and
-document a prototypical frontend with hand-drawn sketches -- one per screen/form.
-Python/tkinter is recommended; if you use something else, say what and why. The
-frontend is delivered as a .deb installer and asks for the API URL and X-API-Key
-in a connection dialog at startup. >>>
+The frontend will be a desktop application built using Tkinter and Python.
 
-% The four boxes below are placeholders. Replace each \placeholder{...} with
-% \includegraphics[width=\linewidth]{your-sketch.jpg} and keep the \captionof.
+% Each \includegraphics below still points at the dummy example-figure.jpg.
+% Swap in your own file per screen, e.g. {fe-connect.jpg}, and keep the \captionof.
 \begin{figure}[ht]
 \centering
 \begin{minipage}[t]{0.47\linewidth}\centering
-  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ connection dialog}
+  \includegraphics[width=\linewidth]{Connection.png}
   \captionof{figure}{Startup connection dialog: API URL + X-API-Key.}
   \label{fig:fe-connect}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.47\linewidth}\centering
-  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ main / list screen}
-  \captionof{figure}{Main screen: <<< list/table, calls \texttt{GET /<<<…>>>} >>>.}
+  \includegraphics[width=\linewidth]{filament_rolls.png}
+  \captionof{figure}{Main screen: filament roll table, calls \texttt{GET /filament/rolls}.}
   \label{fig:fe-main}
 \end{minipage}
 
 \vspace{1em}
 
 \begin{minipage}[t]{0.47\linewidth}\centering
-  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ detail / form screen}
-  \captionof{figure}{Detail form: <<< create/edit, calls \texttt{POST /<<<…>>>} >>>.}
+  \includegraphics[width=\linewidth]{print_models.png}
+  \captionof{figure}{Detail form: print models table, calls \texttt{GET /models}.}
   \label{fig:fe-detail}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.47\linewidth}\centering
-  \placeholder{\linewidth}{3.5cm}{[ placeholder ]\\ second feature screen}
-  \captionof{figure}{<<< Second feature screen and the endpoint it calls >>>.}
+  \includegraphics[width=\linewidth]{print_history.png}
+  \captionof{figure}{Detail form: print history table, calls \texttt{GET /print/jobs}.}
   \label{fig:fe-second}
 \end{minipage}
 \end{figure}
 
+\FloatBarrier
+
 Figures~\ref{fig:fe-connect}--\ref{fig:fe-second} show the four screens of the
-prototype. Figure~\ref{fig:fe-connect} shows <<< the connection dialog that
-collects the API URL and X-API-Key at startup >>>; Figure~\ref{fig:fe-main}
-shows <<< the main screen and the endpoint it reads from >>>;
-Figure~\ref{fig:fe-detail} shows <<< the form used to create/edit a record and
-the write endpoint it calls >>>; and Figure~\ref{fig:fe-second} shows <<< the
-remaining screen >>>.
+prototype. Figure~\ref{fig:fe-connect} shows the connection dialog that
+collects the API URL and X-API-Key at startup ; Figure~\ref{fig:fe-main}
+shows the main screen and the endpoint it reads from ;
+Figure~\ref{fig:fe-detail} shows the print model overview and the endpoint it reads from ;
+ and Figure~\ref{fig:fe-second} shows the print history and the endpoint it reads from.
+
+
 
 % ============================================================
 \section{Operation with Docker Compose}
 % ============================================================
 
-<<< Which services run in your docker-compose.yml (at least postgres and api)?
-Where do the credentials live (.env)? How is the backend deployed on the
-lecture server? >>>
+The application is deployed using \texttt{docker-compose}. The compose file
+starts two services:
+
+\begin{itemize}
+    \item \textbf{postgres}: A PostgreSQL database container that stores all
+    application data.
+    \item \textbf{api}: A FastAPI backend container that provides the REST API
+    and communicates with the PostgreSQL database.
+\end{itemize}
+
+Database credentials and other configuration parameters are stored in a
+\texttt{.env} file. This includes the PostgreSQL username, password, database
+name, host, port and the API authentication key. Using a separate
+\texttt{.env} file keeps sensitive information out of the source code and
+allows different configurations for development and deployment.
+
+On the lecture server, the application is deployed using Docker Compose. After
+cloning the Git repository, the containers are started with
+\texttt{docker compose up -d}. The FastAPI backend is then available via its
+configured port, while the PostgreSQL database is only accessible from within
+the Docker network. Persistent database storage is provided through a Docker
+volume so that the stored data remains available even if the containers are
+recreated.
 
 % ============================================================
 \section{Scope, milestones and risks}
 % ============================================================
 
-\textbf{Scope.} <<< How many tables and endpoints? >>>
+\textbf{Scope.}
+The application consists of \textbf{7 database tables} (\texttt{manufacturer},
+\texttt{material}, \texttt{filament\_type}, \texttt{filament\_roll},
+\texttt{print\_model}, \texttt{print\_job}, and
+\texttt{print\_job\_roll}) and \textbf{8 REST API endpoints}. The API provides
+functions for managing filament, print models, print jobs, inventory
+statistics, and automatic filament selection for new print jobs.
 
-\textbf{Milestones and schedule.} <<< Fill in the week and the estimated hours;
-the hours should add up to roughly 40. >>>
+\textbf{Milestones and schedule.}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\linewidth}{@{}p{1.4cm}Xp{1.8cm}@{}}
 \toprule
 \textbf{Week} & \textbf{Milestone} & \textbf{Est. hours} \\
 \midrule
-<<<1>>>   & <<< e.g. schema + seed data ready >>>                        & <<<8>>> \\
-<<<2--3>>> & <<< e.g. API reading/writing, protected by X-API-Key >>>   & <<<12>>> \\
-<<<4--5>>> & <<< e.g. frontend operates the core endpoints, .deb >>>    & <<<10>>> \\
-<<<6>>>   & <<< e.g. tests + documentation + video >>>                  & <<<10>>> \\
+1 &
+Database design completed (ER model, relational schema, PostgreSQL database,
+Docker Compose, seed data) &
+8 \\
+
+2 &
+Implementation of the FastAPI backend, database connection and CRUD endpoints
+for filament types, rolls and print models &
+10 \\
+
+3 &
+Implementation of print jobs, automatic filament selection, inventory updates
+and API authentication using \texttt{X-API-Key} &
+10 \\
+
+4 &
+Frontend development including inventory management, print history and filament
+selection &
+8 \\
+
+5 &
+Testing, bug fixing, documentation, packaging as a Debian package and final
+project presentation &
+4 \\
+
 \bottomrule
 \end{tabularx}
 
-\textbf{Risks.} <<< One or two risks that could make the project fail. >>>
+\textbf{Risks.}
+The automatic filament selection algorithm may become more complex than
+expected, especially when multiple filament rolls are required for a single
+print job. Another risk is ensuring data consistency when updating the remaining
+filament weight after completed print jobs, which requires careful transaction
+handling to avoid inconsistent inventory data.
 
 % ============================================================
 \section{Acceptance criteria and testing}
 % ============================================================
 
-<<< State when your system counts as ``done and correct'', and how you prove it.
-Formulate each criterion as a checkable statement, then name the test that backs
-it. Turn the risk above into at least one concrete test case. >>>
+The system is considered complete when all planned database functions, API
+endpoints and business rules are implemented and tested successfully. Every
+acceptance criterion can be verified by automated or manual tests.
 
-\textbf{Acceptance criteria.} <<< Checkable statements about the finished system. >>>
+\textbf{Acceptance criteria.}
 \begin{itemize}[topsep=2pt]
-  \item <<< e.g. A record that violates a constraint is rejected (API returns 4xx). >>>
-  \item <<< e.g. GET /<<<…>>> returns the correct aggregated value (JOIN + aggregation). >>>
-  \item <<< e.g. Write endpoints without a valid X-API-Key are refused (401/403). >>>
+    \item The database enforces all defined constraints (PRIMARY KEY, FOREIGN
+    KEY, NOT NULL and CHECK). Invalid records are rejected.
+    
+    \item The API correctly creates, updates and retrieves filament rolls,
+    filament types, print models and print jobs.
+
+    \item The endpoint \texttt{GET /filament/stock} returns the correct
+    aggregated remaining filament weight for every filament type (aggregation).
+
+    \item The endpoint \texttt{GET /filament/types} correctly returns filament
+    types together with their manufacturer and material information (JOIN).
+
+    \item When a new print job is created, the system automatically selects the
+    smallest suitable filament roll (or multiple rolls if necessary) and
+    correctly updates the remaining filament weight.
+
+    \item All write endpoints reject requests without a valid
+    \texttt{X-API-Key} by returning HTTP status code 401 or 403.
 \end{itemize}
 
-\textbf{Test plan.} <<< What you test and with which tools. A short list is enough. >>>
+\textbf{Test plan.}
 \begin{itemize}[topsep=2pt]
-  \item \textbf{Database:} <<< which constraints (PK/FK/UNIQUE/NOT NULL) you verify. >>>
-  \item \textbf{API:} <<< endpoint tests, happy path + error cases, e.g. with
-        \texttt{pytest} and FastAPI's \texttt{TestClient} against a test database (L 08). >>>
-  \item \textbf{Business rule:} <<< the test that covers the risk named above. >>>
+
+    \item \textbf{Database:}
+    Verify PRIMARY KEY, FOREIGN KEY, NOT NULL and CHECK constraints by trying
+    to insert invalid records and confirming that PostgreSQL rejects them.
+
+    \item \textbf{API:}
+    Test all REST endpoints and look for error
+    cases such as invalid input, missing resources and unauthorized access.
+
+    \item \textbf{Business rule:}
+    Verify that the filament selection algorithm always chooses the smallest
+    filament roll with sufficient remaining weight. Additionally, test the case
+    where no single roll contains enough filament, requiring the system to use
+    multiple rolls for one print job while correctly updating the remaining
+    weight of each roll.
+
 \end{itemize}
+
+
 
 \vspace{1em}
 \begin{infobox}
